@@ -1,7 +1,7 @@
 __author__ = 'Pankaj Daga'
 
 import numpy as np
-from utils.image import Image
+import utils.image as im
 from scipy import ndimage
 
 
@@ -71,7 +71,7 @@ def generate_random_smooth_deformation(volume_size,
 
     # Inititalise with zero
     data = np.zeros(dims, dtype=np.float32)
-    def_field = Image.generate_default_image_from_data(data)
+    def_field = im.Image.generate_default_image_from_data(data)
     generate_identity_deformation(def_field)
     # Generate a random displacement field
     displacement = max_deformation * 2 * \
@@ -132,11 +132,11 @@ def field_conversion_method(field_image, image=None,
     if image is not None:
         voxel_2_xyz = image.voxel_2_mm
         vol_ext = image.vol_ext
-        field = Image.from_data(data, image.get_header())
+        field = im.Image.from_data(data, image.get_header())
     else:
         voxel_2_xyz = field_image.voxel_2_mm
         vol_ext = field_image.vol_ext
-        field = Image.from_data(data, field_image.get_header())
+        field = im.Image.from_data(data, field_image.get_header())
 
     voxels = np.mgrid[[slice(i) for i in vol_ext]]
     voxels = [d.reshape(vol_ext, order='F') for d in voxels]
@@ -255,7 +255,7 @@ def initialise_field(im, affine=None):
 
     # Inititalise with zero
     data = np.zeros(dims, dtype=np.float32)
-    field = Image.from_data(data, im.get_header())
+    field = im.Image.from_data(data, im.get_header())
 
     # We have supplied an affine transformation
     if affine is not None:
@@ -320,6 +320,10 @@ def compute_spatial_gradient(image, derivative=None):
     return derivative
 
 
+def spatial_derivative(svf, direction):
+    data = svf.__getattribute__()
+    np.gradient()
+    np.gradient(data[..., direction]) #  evaluated for all direction
 
 
 

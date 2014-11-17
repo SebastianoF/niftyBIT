@@ -1,9 +1,9 @@
 __author__ = 'Pankaj Daga'
 
-from utils.image import Image
+import utils.image as im
 from utils.helper import RegError
 from utils import helper
-from utils.resampler import DisplacementFieldComposer
+import utils.resampler as res
 import numpy as np
 
 
@@ -61,7 +61,7 @@ class SVF(object):
         data = self.field.data
 
         result_data = np.zeros(self.field.data.shape)
-        result = Image.from_data(result_data, self.field.get_header())
+        result = im.Image.from_data(result_data, self.field.get_header())
 
         # Important: Need to specify which axes to use
         norm = np.linalg.norm(data, axis=data.ndim-1)
@@ -81,7 +81,7 @@ class SVF(object):
         init = 1 << num_steps
         result_data = data / init
 
-        dfc = DisplacementFieldComposer()
+        dfc = res.DisplacementFieldComposer()
         # Do the squaring step to perform the integration
         # The exponential is num_steps times recursive composition of
         # the field with itself, which is equivalant to integration over
@@ -90,3 +90,11 @@ class SVF(object):
             result = dfc.compose(result, result)
 
         return result
+
+
+    def jacobian(self):
+        pass
+
+
+def lie_bracket(u, v):
+    pass

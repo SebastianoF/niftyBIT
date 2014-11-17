@@ -1,5 +1,4 @@
 import numpy as np
-from utils.image import Image
 from utils import helper
 
 
