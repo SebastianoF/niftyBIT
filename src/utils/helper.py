@@ -1,9 +1,19 @@
-__author__ = 'Pankaj Daga'
+__author__ = 'Pankaj Daga', 'Sebastiano Ferraris'
+
+'''
+Variable names and concepts:
+
+Velocity field [vf]: vf(d,x,y,z), d = 0,1,2 index with coordinates x,y,z = 0,...dim_x,y,z.
+   vf(x,y,z) = (vf_1(x,y,z), vf_2(x,y,z), vf_3(x,y,z)) = vf_d(x,y,z)    d = 0,1,2
+   note that d has the first place in the data structure.
+Smooth velocity field [smooth_vf]: vector field after gaussian smoothing
+Nifti smooth velocity field [img]: nifti image out of the smooth vector field.
+'''
+
 
 import numpy as np
 import src.utils.image as im
 from scipy import ndimage
-import scipy.ndimage.filters as fil
 
 
 class RegError(Exception):
@@ -17,6 +27,53 @@ class RegError(Exception):
 
     def __str__(self):
         return repr(self.message)
+
+
+def jacobian_at_x(velocity_field, point):
+    """
+
+    :param velocity_field: object of class image, wrapper of the nifty babel.
+    :param point: must be a point in the dimension of the velocity field
+    :return: jacobian. Each point - voxel position -  of the velocity field, is substitute the a 3x3 or 2x2 matrix
+    of the velocity field vector.
+    """
+
+    if velocity_field.data.shape[0] == 2:
+        grad = np.gradient(velocity_field[0])
+        x_x = grad[0]
+        x_y = grad[1]
+        grad = np.gradient(velocity_field[1])
+        y_x = grad[0]
+        y_y = grad[1]
+
+        jac_det = x_x * y_y - x_y * y_x
+
+
+    else:
+        grad = np.gradient(velocity_field[0])
+        x_x = grad[0]
+        x_y = grad[1]
+        x_z = grad[2]
+        grad = np.gradient(velocity_field[..., 1])
+        y_x = grad[0]
+        y_y = grad[1]
+        y_z = grad[2]
+        grad = np.gradient(velocity_field[..., 2])
+        z_x = grad[0]
+        z_y = grad[1]
+        z_z = grad[2]
+
+        jac_det = x_x * (y_y*z_z - y_z*z_y) - \
+            x_y * (y_x*z_z - y_z*z_x) + x_z * (y_x*z_y - y_y*z_x)
+
+
+def jacobian():
+    pass
+
+
+def det_jacobian():
+    # for both jacobian at x and jacobian
+    pass
 
 
 def generate_identity_deformation(def_image, image=None):
@@ -50,25 +107,29 @@ def generate_identity_deformation(def_image, image=None):
 
 def generate_random_smooth_deformation(volume_size,
                                        max_deformation=3,
-                                       sigma=1):
+                                       sigma=1,
+                                       required_positive_jacobian=True):
     """
     Generate a random smooth deformation
-    :param: def_image: Deformation field image. It will be updated with the deformation.
+    :param: volume_size: Deformation field image. It will be updated with the deformation.
     :param: max_deformation_in_voxels Maximum amount of deformation in voxels.
 
-    The method ensures that the jacobian determinant of the deformation is positive.
+    If positive_det_jacobian is True the method ensures that the jacobian determinant of the deformation is positive .
+    dims = [d, dim_x, dim_y, (dim_z)] where dim_z is optional if the vector field has dimension 3.
     """
+
+    dimensions = len(volume_size)
+
+    if dimensions > 3:
+        volume_size = volume_size[0:3]
+
     if sigma <= 0:
         sigma = max_deformation/3
 
-    if len(volume_size) > 3:
-        volume_size = volume_size[0:3]
-
+    #  dims = [d, dim_x, dim_y, (dim_z)]
     dims = list()
+    dims.extend([dimensions])
     dims.extend(volume_size)
-    while len(dims) < 4:
-        dims.extend([1])
-    dims.extend([len(volume_size)])
 
     # Initialise with zero
     data = np.zeros(dims, dtype=np.float32)
@@ -80,44 +141,15 @@ def generate_random_smooth_deformation(volume_size,
     # Smooth the displacement field
     displacement = ndimage.gaussian_filter(displacement, sigma=sigma)
 
-    disp_s = def_field.data.squeeze() + displacement.squeeze()
-    done = False
-    while not done:
-        if len(volume_size) == 2:
-            grad = np.gradient(disp_s[..., 0])
-            x_x = grad[0]
-            x_y = grad[1]
-            grad = np.gradient(disp_s[..., 1])
-            y_x = grad[0]
-            y_y = grad[1]
+    if required_positive_jacobian:
 
-            jac_det = x_x * y_y - x_y * y_x
+        disp_s = def_field.data.squeeze() + displacement.squeeze()
+        done = False
 
-            if np.min(jac_det) < 0.1:
-                displacement = ndimage.gaussian_filter(displacement, sigma=sigma)
-                disp_s = def_field.data.squeeze() + displacement.squeeze()
-            else:
-                done = True
-        else:
-            grad = np.gradient(disp_s[..., 0])
-            x_x = grad[0]
-            x_y = grad[1]
-            x_z = grad[2]
-            grad = np.gradient(disp_s[..., 1])
-            y_x = grad[0]
-            y_y = grad[1]
-            y_z = grad[2]
-            grad = np.gradient(disp_s[..., 2])
-            z_x = grad[0]
-            z_y = grad[1]
-            z_z = grad[2]
-
-            jac_det = x_x * (y_y*z_z - y_z*z_y) - \
-                x_y * (y_x*z_z - y_z*z_x) + x_z * (y_x*z_y - y_y*z_x)
-
-            if np.min(jac_det) < 0.1:
-                displacement = ndimage.gaussian_filter(displacement, sigma=sigma)
-                disp_s = def_field.data.squeeze() + displacement.squeeze()
+        while not done:
+            if det_jacobian(disp_s) < 0.1:
+                    displacement = ndimage.gaussian_filter(displacement, sigma=sigma)
+                    disp_s = def_field.data.squeeze() + displacement.squeeze()
             else:
                 done = True
 

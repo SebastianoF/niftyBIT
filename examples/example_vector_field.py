@@ -12,10 +12,10 @@ from src.utils.helper import generate_random_smooth_deformation, compute_spatial
 '''
 Variable names and concepts:
 
-Vector field [vf]: vf(d,x,y,z), d = 0,1,2 index with coordinates x,y,z = 0,...dim_x,y,z.
+Velocity field [vf]: vf(d,x,y,z), d = 0,1,2 index with coordinates x,y,z = 0,...dim_x,y,z.
    vf(x,y,z) = (vf_1(x,y,z), vf_2(x,y,z), vf_3(x,y,z)) = vf_d(x,y,z)    d = 0,1,2
-Smooth vector field [smooth_vf]: vector field after gaussian smoothing
-Nifti smooth vector field [img]: nifti image out of the smooth vector field.
+Smooth velocity field [smooth_vf]: vector field after gaussian smoothing
+Nifti smooth velocity field [img]: nifti image out of the smooth vector field.
 '''
 
 # generate random smooth deformation:
@@ -61,22 +61,11 @@ def gradient_smooth_vector_field(smooth_vf):
     return grad
 
 
-rsd = generate_random_smooth_deformation((128,128,128))
+rsd = generate_random_smooth_deformation((128, 128, 128))
 grad_rsd = compute_spatial_gradient(rsd)
 
 
 # from nibabel nifti type to vector field to SVF
-
-
-# partial derivative.
-
-
-
-# print image and partial derivative of the a-th i-th slice (a = x,y,z, i = 0, dim_a)
-
-
-
-# transform the image in a SVF
 
 
 

@@ -92,8 +92,8 @@ class SVF(object):
         return result
 
     def jacobian(self):
+        #compute_spatial_gradient(self,)
         pass
-
 
 def lie_bracket(u, v):
     pass

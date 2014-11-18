@@ -35,7 +35,8 @@ class Image(object):
         """
         Create object from data and header
         :param data: The image data
-        :param header: The image header to use
+        :param header: The image header to use.
+        Affine transformation is not defined.
         """
         image = nib.Nifti1Image(data, affine=None, header=header)
         return cls(image)
