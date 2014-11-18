@@ -4,6 +4,7 @@ import nibabel as nib
 from numpy import linalg as la
 from os import path
 import numpy as np
+import scipy.ndimage.filters as fil
 
 
 class Image(object):
@@ -104,3 +105,30 @@ class Image(object):
         self.voxel_2_mm = mat
         self.mm_2_voxel = la.inv(self.voxel_2_mm)
         header.set_sform(mat, 1)
+
+
+def random_smooth_vector_field(dim_x=128, dim_y=128, dim_z=128):
+    """
+    Generate a smooth random 3d vector field on a 3d grid.
+
+    :param dim_x,dim_y,dim_z: dimension of the vector field
+    :return: random smooth vector field ready to be initialized as a SVF object
+    :rtype : np.array
+    """
+    vf = np.ones((3, dim_x, dim_y, dim_z), dtype=np.float64)
+    for i in range(3):
+        vf[i] = np.random.normal(0, 1, (dim_x, dim_y, dim_z))
+    smooth_vf = fil.gaussian_filter(vf, 2)
+    return smooth_vf
+
+
+def smooth_vf2nibabel(smooth_vf, a=np.eye(4)):
+    """
+    From a smooth vector field to a nibabel image
+    :param smooth_vf: smooth vector field
+    :param a: homogenous affine giving relationship between voxel coordinates and world coordinates.
+    :return: the nifty type image
+    :rtype: nifty image
+    """
+    img = nib.Nifti1Image(smooth_vf, a)
+    return img

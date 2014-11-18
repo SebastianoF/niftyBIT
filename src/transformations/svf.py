@@ -1,9 +1,9 @@
 __author__ = 'Pankaj Daga'
 
-import utils.image as im
-from utils.helper import RegError
-from utils import helper
-import utils.resampler as res
+import src.utils.image as im
+from src.utils.helper import RegError
+from src.utils import helper
+import src.utils.resampler as res
 import numpy as np
 
 
@@ -84,13 +84,12 @@ class SVF(object):
         dfc = res.DisplacementFieldComposer()
         # Do the squaring step to perform the integration
         # The exponential is num_steps times recursive composition of
-        # the field with itself, which is equivalant to integration over
+        # the field with itself, which is equivalent to integration over
         # the unit interval.
         for _ in range(0, num_steps):
             result = dfc.compose(result, result)
 
         return result
-
 
     def jacobian(self):
         pass

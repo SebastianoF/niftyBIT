@@ -1,8 +1,9 @@
 __author__ = 'Pankaj Daga'
 
 import numpy as np
-import utils.image as im
+import src.utils.image as im
 from scipy import ndimage
+import scipy.ndimage.filters as fil
 
 
 class RegError(Exception):
@@ -52,8 +53,8 @@ def generate_random_smooth_deformation(volume_size,
                                        sigma=1):
     """
     Generate a random smooth deformation
-    param: def_image: Deformation field image. It will be updated with the deformation.
-    max_deformation_in_voxels: Maximum amount of deformation in voxels.
+    :param: def_image: Deformation field image. It will be updated with the deformation.
+    :param: max_deformation_in_voxels Maximum amount of deformation in voxels.
 
     The method ensures that the jacobian determinant of the deformation is positive.
     """
@@ -69,7 +70,7 @@ def generate_random_smooth_deformation(volume_size,
         dims.extend([1])
     dims.extend([len(volume_size)])
 
-    # Inititalise with zero
+    # Initialise with zero
     data = np.zeros(dims, dtype=np.float32)
     def_field = im.Image.generate_default_image_from_data(data)
     generate_identity_deformation(def_field)
@@ -253,7 +254,7 @@ def initialise_field(im, affine=None):
         dims.extend([1])
     dims.extend([len(vol_ext)])
 
-    # Inititalise with zero
+    # Initialise with zero
     data = np.zeros(dims, dtype=np.float32)
     field = im.Image.from_data(data, im.get_header())
 

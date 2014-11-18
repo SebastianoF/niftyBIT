@@ -4,8 +4,8 @@ from scipy import ndimage
 
 from image import *
 from helper import generate_identity_deformation, \
-    generate_displacement_from_deformation, \
-    generate_position_from_displacement
+                    generate_displacement_from_deformation, \
+                    generate_position_from_displacement
 
 
 class ImageResampler(object):
