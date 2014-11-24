@@ -1,17 +1,20 @@
 # Import modules
-from utils.helper import *
-from utils.resampler import *
+from src.utils.helper import *
+from src.utils.resampler import *
 import nibabel as nib
-import transformations.svf as SVF
+import src.transformations.svf as SVF
 import scipy.ndimage.filters
 import matplotlib.pyplot as plt
 import copy
+import numpy as np
+import image
+reload(image)
 
 # Generate an image mostly to get a basic structure
 #data = np.zeros((128, 128, 128))
 #im = Image(nib.Nifti1Image(data,np.eye(4)))
 data = np.zeros((128, 128))
-im = Image(nib.Nifti1Image(data,np.eye(4)))
+im = image.Image(nib.Nifti1Image(data,np.eye(4)))
 print 'im shape ' + str(im.data.shape)
 
 # Generate a first smooth velocity field (should switch to Pankaj's code at some point)

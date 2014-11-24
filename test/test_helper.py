@@ -1,4 +1,4 @@
-from helper import *
+from src.utils.helper import *
 import numpy as np
 
 # toy sample vector fields:
@@ -44,8 +44,9 @@ v2 = np.array([
               ]
               ])
 
+# 3d vector field on a grid of dimension (5,5,5)
 v3 = np.array([
-               np.random.normal(0, 1, (3,3,3)),
-               np.random.normal(0, 1, (3,3,3)),
-               np.random.normal(0, 1, (3,3,3))
+               np.random.normal(0, 1, (5,5,5)),
+               np.random.normal(0, 1, (5,5,5)),
+               np.random.normal(0, 1, (5,5,5))
               ])

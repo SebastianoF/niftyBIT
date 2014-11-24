@@ -12,7 +12,7 @@ Nifti smooth velocity field [img]: nifti image out of the smooth vector field.
 
 
 import numpy as np
-import src.utils.image as im
+import src.utils.image as imag
 from scipy import ndimage
 
 
@@ -29,14 +29,59 @@ class RegError(Exception):
         return repr(self.message)
 
 
+def get_neighborhood(velocity_field, point, strategy='linear', sigma=1):
+    """
+    Given a vector field (2d or 3d) and one of its points it returns its
+    the velocity field of its cubic neighborhood.
+    If point is on the border he fulfil the missing voxels using some strategy.
+    Strategy can be 'zero', 'linear' (default), 'gaussian' with sigma (1 default), 'mirror', 'torus'
+    :return: (3,3,3,3) sub-figure as cubic neighborhood of velocity_field defined
+    centred in the given point.
+    """
+    if not len(point) == velocity_field.data.shape[0]:
+        raise TypeError("get_neighborhood inserted values are not coherent")
+
+    dim = velocity_field.data.shape[1::]
+    if False in [-1 < i < j for i, j in zip(list(point),list(dim))]:
+        raise TypeError("The point inserted do not belong to the vector field")
+
+    neighborhood = 0
+
+
+    pass
+
+
 def jacobian_at_x(velocity_field, point):
     """
 
     :param velocity_field: object of class image, wrapper of the nifty babel.
-    :param point: must be a point in the dimension of the velocity field
+    :param point: must be a point in the grid where the velocity field is defined
     :return: jacobian. Each point - voxel position -  of the velocity field, is substitute the a 3x3 or 2x2 matrix
     of the velocity field vector.
     """
+
+    if not len(point) == velocity_field.data.shape[0]:
+        raise TypeError()
+
+    grad_vf1 = np.array(np.gradient(velocity_field[0]))
+    dvf1_dx = grad_vf1[0]
+    dvf1_dy = grad_vf1[1]
+    dvf1_dz = grad_vf1[2]
+    grad_vf2 = np.array(np.gradient(velocity_field[1]))
+    dvf2_dx = grad_vf2[0]
+    dvf2_dy = grad_vf2[1]
+    dvf2_dz = grad_vf2[2]
+    grad_vf3 = np.array(np.gradient(velocity_field[1]))
+    dvf3_dx = grad_vf3[0]
+    dvf3_dy = grad_vf3[1]
+    dvf3_dz = grad_vf3[2]
+
+
+
+    return
+
+
+'''
 
     if velocity_field.data.shape[0] == 2:
         grad = np.gradient(velocity_field[0])
@@ -54,11 +99,11 @@ def jacobian_at_x(velocity_field, point):
         x_x = grad[0]
         x_y = grad[1]
         x_z = grad[2]
-        grad = np.gradient(velocity_field[..., 1])
+        grad = np.gradient(velocity_field[1])
         y_x = grad[0]
         y_y = grad[1]
         y_z = grad[2]
-        grad = np.gradient(velocity_field[..., 2])
+        grad = np.gradient(velocity_field[2])
         z_x = grad[0]
         z_y = grad[1]
         z_z = grad[2]
@@ -66,7 +111,7 @@ def jacobian_at_x(velocity_field, point):
         jac_det = x_x * (y_y*z_z - y_z*z_y) - \
             x_y * (y_x*z_z - y_z*z_x) + x_z * (y_x*z_y - y_y*z_x)
 
-
+'''
 def jacobian():
     pass
 
@@ -133,7 +178,7 @@ def generate_random_smooth_deformation(volume_size,
 
     # Initialise with zero
     data = np.zeros(dims, dtype=np.float32)
-    def_field = im.Image.generate_default_image_from_data(data)
+    def_field = imag.Image.generate_default_image_from_data(data)
     generate_identity_deformation(def_field)
     # Generate a random displacement field
     displacement = max_deformation * 2 * \
@@ -165,11 +210,11 @@ def field_conversion_method(field_image, image=None,
     if image is not None:
         voxel_2_xyz = image.voxel_2_mm
         vol_ext = image.vol_ext
-        field = im.Image.from_data(data, image.get_header())
+        field = imag.Image.from_data(data, image.get_header())
     else:
         voxel_2_xyz = field_image.voxel_2_mm
         vol_ext = field_image.vol_ext
-        field = im.Image.from_data(data, field_image.get_header())
+        field = imag.Image.from_data(data, field_image.get_header())
 
     voxels = np.mgrid[[slice(i) for i in vol_ext]]
     voxels = [d.reshape(vol_ext, order='F') for d in voxels]
@@ -288,7 +333,7 @@ def initialise_field(im, affine=None):
 
     # Initialise with zero
     data = np.zeros(dims, dtype=np.float32)
-    field = im.Image.from_data(data, im.get_header())
+    field = imag.from_data(data, im.get_header())
 
     # We have supplied an affine transformation
     if affine is not None:
